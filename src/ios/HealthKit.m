@@ -782,6 +782,13 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     //  if (false) {
     //    workoutPredicate = [HKQuery predicateForWorkoutsWithWorkoutActivityType:HKWorkoutActivityTypeCycling];
     //  }
+    NSDictionary *args = command.arguments[0];
+
+    BOOL filtered = (args[@"filtered"] != nil && [args[@"filtered"] boolValue]);
+    if (filtered) {
+       workoutPredicate = [NSPredicate predicateWithFormat:@"metadata.%K != YES", HKMetadataKeyWasUserEntered];
+    }
+
 
     NSSet *types = [NSSet setWithObjects:[HKWorkoutType workoutType], nil];
     [[HealthKit sharedHealthStore] requestAuthorizationToShareTypes:nil readTypes:types completion:^(BOOL success, NSError *error) {
@@ -1362,6 +1369,13 @@ static NSString *const HKPluginKeyUUID = @"UUID";
     }
     // TODO check that unit is compatible with sampleType if sample type of HKQuantityType
     NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
+    
+    BOOL filtered = (args[@"filtered"] != nil && [args[@"filtered"] boolValue]);
+    if (filtered) {
+        NSPredicate *filteredPredicate = [NSPredicate predicateWithFormat:@"metadata.%K != YES", HKMetadataKeyWasUserEntered];
+        predicate = [NSCompoundPredicate andPredicateWithSubpredicates: @[predicate, filteredPredicate]];
+    }
+
 
     NSSet *requestTypes = [NSSet setWithObjects:type, nil];
     [[HealthKit sharedHealthStore] requestAuthorizationToShareTypes:nil readTypes:requestTypes completion:^(BOOL success, NSError *error) {
