@@ -822,6 +822,15 @@ public class HealthPlugin extends CordovaPlugin {
                         obj.put("value", activity);
                         obj.put("unit", "activityType");
 
+                        String streamData = dataSource.getStreamIdentifier();
+
+                        if (args.getJSONObject(0).has("filtered") && args.getJSONObject(0).getBoolean("filtered")) {
+                            // Exclude user input data points
+                            if (streamData.contains("user_input")) {
+                                continue;
+                            }
+                        }
+                    
                         //extra queries to get calorie and distance records related to the activity times
                         DataReadRequest.Builder readActivityRequestBuilder = new DataReadRequest.Builder();
                         readActivityRequestBuilder.setTimeRange(datapoint.getStartTime(TimeUnit.MILLISECONDS), datapoint.getEndTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
